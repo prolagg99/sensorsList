@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">sensorsList</string>
+    <string name="error_no_sensor">No sensor</string>
+    <string name="label_proximity">Proximity Sensor: %1$.2f</string>
+    <string name="label_light">%1$.2f Lux</string>
+    <string name="x_axis">X %1$.5f</string>
+    <string name="y_axis">Y %1$.5f</string>
+    <string name="z_axis">Z %1$.5f</string>
+</resources>
