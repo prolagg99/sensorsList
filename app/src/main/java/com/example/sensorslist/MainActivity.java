@@ -8,7 +8,11 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -19,18 +23,18 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     SensorManager mSensorManager;
 
     // Individual light and proximity sensors.
-    private Sensor mSensorProximity;
     private Sensor mSensorLight;
     private Sensor mSensorAccelerometer;
     private Sensor mSensorMagnetometer;
     private Sensor mSensorGyroscope;
 
     // TextViews to display current sensor values
-    private TextView mTextSensorProximity;
     TextView mTextAccSensor_X, mTextAccSensor_Y, mTextAccSensor_Z;
     TextView mTextMagSensor_X, mTextMagSensor_Y, mTextMagSensor_Z;
     TextView mTextGyroSensor_X, mTextGyroSensor_Y, mTextGyroSensor_Z;
-    TextView mTextLightSensor;
+    TextView mTextLightSensor_LUX;
+    TextView mTextLightSensor, mTextGyroSensor, mTextMagnSensor;
+    Button btnStart, btnReset;
 
 
     @Override
@@ -53,48 +57,81 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         mTextGyroSensor_Y = (TextView) findViewById(R.id.gyro_y);
         mTextGyroSensor_Z = (TextView) findViewById(R.id.gyro_z);
 
-        mTextLightSensor = (TextView) findViewById(R.id.light_lux);
-        mTextSensorProximity = (TextView) findViewById(R.id.label_proximity);
+        mTextLightSensor_LUX = (TextView) findViewById(R.id.light_lux);
+
+        mTextMagnSensor = (TextView) findViewById(R.id.id_magn);
+        mTextGyroSensor = (TextView) findViewById(R.id.id_gyro);
+        mTextLightSensor = (TextView) findViewById(R.id.id_light);
+
+        btnReset = (Button) findViewById(R.id.btnReset);
+        btnStart = (Button) findViewById(R.id.btnStart);
 
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        mSensorProximity = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
         mSensorLight = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
         mSensorAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         mSensorMagnetometer = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
         mSensorGyroscope = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
 
+        // to check if device support the sensor
+        if(mSensorGyroscope == null)
+            mTextGyroSensor.setText("Gyroscope: " + sensor_error);
+        if(mSensorMagnetometer == null)
+            mTextMagnSensor.setText("Magnetometer: " + sensor_error);
         if(mSensorLight == null)
-            mTextLightSensor.setText(sensor_error);
-        if(mSensorProximity == null)
-            mTextSensorProximity.setText(sensor_error);
+            mTextLightSensor.setText("Lumination: " + sensor_error);
 
+        btnStart.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mSensorLight != null) {
+                    mSensorManager.registerListener(MainActivity.this, mSensorLight,
+                            SensorManager.SENSOR_DELAY_NORMAL);
+                }
+                if (mSensorAccelerometer != null) {
+                    mSensorManager.registerListener(MainActivity.this, mSensorAccelerometer,
+                            SensorManager.SENSOR_DELAY_NORMAL);
+                }
+                if (mSensorMagnetometer != null) {
+                    mSensorManager.registerListener(MainActivity.this, mSensorMagnetometer,
+                            SensorManager.SENSOR_DELAY_NORMAL);
+                }
+                if (mSensorGyroscope != null) {
+                    mSensorManager.registerListener(MainActivity.this, mSensorGyroscope,
+                            SensorManager.SENSOR_DELAY_NORMAL);
+                }
+            }
+        });
+
+        btnReset.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onStop();
+                clearForm((ViewGroup) findViewById(R.id.father));
+            }
+        });
 
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-
-        if (mSensorProximity != null) {
-            mSensorManager.registerListener(this, mSensorProximity,
-                    SensorManager.SENSOR_DELAY_NORMAL);
-        }
-        if (mSensorLight != null) {
-            mSensorManager.registerListener(this, mSensorLight,
-                    SensorManager.SENSOR_DELAY_NORMAL);
-        }
-        if (mSensorAccelerometer != null) {
-            mSensorManager.registerListener(this, mSensorAccelerometer,
-                    SensorManager.SENSOR_DELAY_NORMAL);
-        }
-        if (mSensorMagnetometer != null) {
-            mSensorManager.registerListener(this, mSensorMagnetometer,
-                    SensorManager.SENSOR_DELAY_NORMAL);
-        }
-        if (mSensorGyroscope != null) {
-            mSensorManager.registerListener(this, mSensorGyroscope,
-                    SensorManager.SENSOR_DELAY_NORMAL);
-        }
+        clearForm((ViewGroup) findViewById(R.id.father));
+//        if (mSensorLight != null) {
+//            mSensorManager.registerListener(this, mSensorLight,
+//                    SensorManager.SENSOR_DELAY_NORMAL);
+//        }
+//        if (mSensorAccelerometer != null) {
+//            mSensorManager.registerListener(this, mSensorAccelerometer,
+//                    SensorManager.SENSOR_DELAY_NORMAL);
+//        }
+//        if (mSensorMagnetometer != null) {
+//            mSensorManager.registerListener(this, mSensorMagnetometer,
+//                    SensorManager.SENSOR_DELAY_NORMAL);
+//        }
+//        if (mSensorGyroscope != null) {
+//            mSensorManager.registerListener(this, mSensorGyroscope,
+//                    SensorManager.SENSOR_DELAY_NORMAL);
+//        }
     }
 
     @Override
@@ -143,13 +180,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             // Event came from the light sensor.
             case Sensor.TYPE_LIGHT: {
                 // Handle light sensor
-                mTextLightSensor.setText(getResources().getString(
+                mTextLightSensor_LUX.setText(getResources().getString(
                         R.string.label_light, currentValue));
-                break;
-            }
-            case Sensor.TYPE_PROXIMITY: {
-                mTextSensorProximity.setText(getResources().getString(
-                        R.string.label_proximity, currentValue));
                 break;
             }
             case Sensor.TYPE_ACCELEROMETER: {
@@ -165,9 +197,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 break;
             }
             case Sensor.TYPE_MAGNETIC_FIELD: {
-                mTextGyroSensor_X.setText(getResources().getString(R.string.x_axis, linear_acceleration_magn[0]));
-                mTextGyroSensor_Y.setText(getResources().getString(R.string.y_axis, linear_acceleration_magn[1]));
-                mTextGyroSensor_Z.setText(getResources().getString(R.string.z_axis, linear_acceleration_magn[2]));
+                mTextMagSensor_X.setText(getResources().getString(R.string.x_axis, linear_acceleration_magn[0]));
+                mTextMagSensor_Y.setText(getResources().getString(R.string.y_axis, linear_acceleration_magn[1]));
+                mTextMagSensor_Z.setText(getResources().getString(R.string.z_axis, linear_acceleration_magn[2]));
                 break;
             }
             default:
@@ -183,6 +215,18 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @Override
     public void onPointerCaptureChanged(boolean hasCapture) {
 
+    }
+
+    private void clearForm(ViewGroup group) {
+        for (int i = 0, count = group.getChildCount(); i < count; ++i) {
+            View view = group.getChildAt(i);
+            if (view instanceof EditText) {
+                ((EditText)view).setText("");
+            }
+
+            if(view instanceof ViewGroup && (((ViewGroup)view).getChildCount() > 0))
+                clearForm((ViewGroup)view);
+        }
     }
 }
 
