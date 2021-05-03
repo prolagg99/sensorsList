@@ -30,7 +30,7 @@ public class TestActivity extends AppCompatActivity implements SensorEventListen
     private Sensor mSensorMagnetometer;
     private Sensor mSensorGyroscope;
 
-    LinearLayout meanLayout;
+    LinearLayout meanLayout, accMeanField, magnMeanField, gyroMeanField;
     CheckBox checkbox_Acc, checkbox_Magn, checkbox_gyro;
 
     // TextViews to display current sensor values
@@ -61,6 +61,9 @@ public class TestActivity extends AppCompatActivity implements SensorEventListen
 
         // make the layout that have the values of mean invisible till the process finish (after 20s)
         meanLayout = (LinearLayout) findViewById(R.id.meanLayout);
+        accMeanField = (LinearLayout) findViewById(R.id.accMeanField);
+        magnMeanField = (LinearLayout) findViewById(R.id.magnMeanField);
+        gyroMeanField = (LinearLayout) findViewById(R.id.gyroMeanField);
 
         checkbox_Acc = (CheckBox) findViewById(R.id.checkbox_Acc);
         checkbox_Magn = (CheckBox) findViewById(R.id.checkbox_Magn);
@@ -112,9 +115,12 @@ public class TestActivity extends AppCompatActivity implements SensorEventListen
 //                    for(int i=0; i<3; i++ ){
 //                        accl_mean[i] =  0;
 //                    }
-                    meanLayout.setVisibility(View.INVISIBLE);
-                    clearForm((ViewGroup) findViewById(R.id.meanLayout));
                     clearForm((ViewGroup) findViewById(R.id.testFather));
+                    clearForm((ViewGroup) findViewById(R.id.meanLayout));
+                    accMeanField.setVisibility(View.INVISIBLE);
+                    magnMeanField.setVisibility(View.INVISIBLE);
+                    gyroMeanField.setVisibility(View.INVISIBLE);
+
                     if (accChecked) {
                         nmbrOfCheck++;
                         if (mSensorAccelerometer != null) {
@@ -155,11 +161,10 @@ public class TestActivity extends AppCompatActivity implements SensorEventListen
                                 checkbox_gyro.setEnabled(true);
                                 // stop listening for all sensors after 20s
                                 mSensorManager.unregisterListener(TestActivity.this);
-                                // make the layout visible to display the mean value
-                                meanLayout.setVisibility(View.VISIBLE);
 
                                 Log.e("listSize after collect" , " value : " + acclDataCollection.size());
                                 // calculate the mean after the collection of data done
+                                double[] result;
                                 double mean[] = new double[] {0,0,0};
                                 for (ValuesOf_x_y_z d : acclDataCollection ){
                                     mean[0] += d.x;
@@ -171,21 +176,36 @@ public class TestActivity extends AppCompatActivity implements SensorEventListen
                                 mean[1] /= acclDataCollection.size();
                                 mean[2] /= acclDataCollection.size();
                                 Log.e("division ", "value" + mean[0] + " " + mean[1] + " " + mean[2] );
-                                x_accMean.setText(getResources().getString(R.string.x_axis, mean[0]));
-                                y_accMean.setText(getResources().getString(R.string.y_axis, mean[1]));
-                                z_accMean.setText(getResources().getString(R.string.z_axis, mean[2]));
 
-                                // i should before clear the data of arrayList .. upload the data to a dataBase
-                                acclDataCollection.clear();
+                                if(acclDataCollection.size() != 0){
+                                    result = meanFun(acclDataCollection, acclDataCollection.size());
+                                    x_accMean.setText(getResources().getString(R.string.x_axis, result[0]));
+                                    y_accMean.setText(getResources().getString(R.string.y_axis, result[1]));
+                                    z_accMean.setText(getResources().getString(R.string.z_axis, result[2]));
+                                    accMeanField.setVisibility(View.VISIBLE);
+                                    // before clear data i should upload it to the dataBase
+                                    acclDataCollection.clear();
+                                }
                                 Log.e("listSize after clean" , " value : " + acclDataCollection.size());
 
-                                double[] result = meanFun(magnDataCollection, magnDataCollection.size());
-                                x_magMean.setText(getResources().getString(R.string.x_axis, result[0]));
-                                y_magMean.setText(getResources().getString(R.string.y_axis, result[1]));
-                                z_magMean.setText(getResources().getString(R.string.z_axis, result[2]));
-                                magnDataCollection.clear();
-
-
+                                if(magnDataCollection.size() != 0){
+                                    result = meanFun(magnDataCollection, magnDataCollection.size());
+                                    x_magMean.setText(getResources().getString(R.string.x_axis, result[0]));
+                                    y_magMean.setText(getResources().getString(R.string.y_axis, result[1]));
+                                    z_magMean.setText(getResources().getString(R.string.z_axis, result[2]));
+                                    magnMeanField.setVisibility(View.VISIBLE);
+                                    // before clear data i should upload it to the dataBase
+                                    magnDataCollection.clear();
+                                }
+                                if(gyroDataCollection.size() != 0){
+                                    result = meanFun(gyroDataCollection, gyroDataCollection.size());
+                                    x_gyroMean.setText(getResources().getString(R.string.x_axis, result[0]));
+                                    y_gyroMean.setText(getResources().getString(R.string.y_axis, result[1]));
+                                    z_gyroMean.setText(getResources().getString(R.string.z_axis, result[2]));
+                                    gyroMeanField.setVisibility(View.VISIBLE);
+                                    // before clear data i should upload it to the dataBase
+                                    gyroDataCollection.clear();
+                                }
                             }
                         }, 5000);
                     }
@@ -203,7 +223,10 @@ public class TestActivity extends AppCompatActivity implements SensorEventListen
     @Override
     protected void onStart() {
         super.onStart();
-        meanLayout.setVisibility(View.INVISIBLE);
+        accMeanField.setVisibility(View.INVISIBLE);
+        magnMeanField.setVisibility(View.INVISIBLE);
+        gyroMeanField.setVisibility(View.INVISIBLE);
+        clearForm((ViewGroup) findViewById(R.id.meanLayout));
         clearForm((ViewGroup) findViewById(R.id.testFather));
     }
 
@@ -363,7 +386,6 @@ public class TestActivity extends AppCompatActivity implements SensorEventListen
         mean[2] /= size;
         return mean;
     }
-
 }
 
 class ValuesOf_x_y_z{
