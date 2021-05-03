@@ -3,6 +3,7 @@ package com.example.sensorslist;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
+import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -13,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -35,7 +37,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     TextView mTextLightSensor_LUX;
     TextView mTextLightSensor, mTextGyroSensor, mTextMagnSensor;
     Button btnStart, btnReset;
-
+    ImageView btnTestActivity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +67,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         btnReset = (Button) findViewById(R.id.btnReset);
         btnStart = (Button) findViewById(R.id.btnStart);
+
+        btnTestActivity= (ImageView) findViewById(R.id.btn_testActivity);
 
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         mSensorLight = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
@@ -106,16 +110,23 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             @Override
             public void onClick(View v) {
                 onStop();
-                clearForm((ViewGroup) findViewById(R.id.father));
+                clearForm((ViewGroup) findViewById(R.id.mainFather));
             }
         });
 
+        btnTestActivity.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(),TestActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        clearForm((ViewGroup) findViewById(R.id.father));
+        clearForm((ViewGroup) findViewById(R.id.mainFather));
 //        if (mSensorLight != null) {
 //            mSensorManager.registerListener(this, mSensorLight,
 //                    SensorManager.SENSOR_DELAY_NORMAL);

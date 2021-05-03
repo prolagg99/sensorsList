@@ -8,6 +8,7 @@
     android:background="#E8E8E8">
 
     <LinearLayout
+        android:id="@+id/testFather"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_margin="20dp"
@@ -40,6 +41,7 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/accLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
@@ -48,6 +50,7 @@
                     android:id="@+id/acc_x"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:focusable="false"
                     android:layout_marginRight="8dp"
                     android:layout_weight="1"
                     android:background="#ffffff"
@@ -101,6 +104,7 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/magnLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
@@ -163,6 +167,7 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/gyroLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
@@ -248,20 +253,7 @@
         </LinearLayout>
 
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            android:orientation="horizontal">
-
-            <Button
-                android:id="@+id/btnReset"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="10dp"
-                android:text="Reset" />
-        </LinearLayout>
-
-        <LinearLayout
+            android:id="@+id/meanLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
@@ -282,7 +274,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Accelerometer"
+                        android:text="mean Acce"
                         android:textColor="#000000"
                         android:textSize="20dp" />
 
@@ -344,7 +336,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Magnetometer"
+                        android:text="mean Magne"
                         android:textColor="#000000"
                         android:textSize="20dp" />
                 </LinearLayout>
@@ -390,7 +382,6 @@
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/meanLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
@@ -406,7 +397,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Gyro"
+                        android:text="mean gyro"
                         android:textColor="#000000"
                         android:textSize="20dp" />
                 </LinearLayout>
