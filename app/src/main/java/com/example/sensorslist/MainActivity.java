@@ -32,7 +32,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     EditText mTextGyroSensor_X, mTextGyroSensor_Y, mTextGyroSensor_Z;
     EditText mTextLightSensor_LUX, mTextNmbrOfSteps;
     TextView mTextLightSensor, mTextGyroSensor, mTextMagnSensor, mTextStepCounterSensor;
-    Button btnStart, btnReset, btnStepDetecter;
+    Button btnStart, btnReset, btnStepDetecter, btnSkyhookActivity;
     ImageView btnTestActivity, btnConnectivityActivity;
 
     @Override
@@ -70,6 +70,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         // activities buttons
         btnTestActivity= (ImageView) findViewById(R.id.btn_testActivity);
         btnConnectivityActivity = (ImageView) findViewById(R.id.btn_connectivityActivity);
+        btnSkyhookActivity = (Button) findViewById(R.id.btn_skyhookActivity);
 
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         mSensorLight = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
@@ -143,6 +144,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             public void onClick(View v) {
                 Intent intentConnectivityActivity = new Intent(getApplicationContext(), ConnectivityActivity.class);
                 startActivity(intentConnectivityActivity);
+            }
+        });
+
+        btnSkyhookActivity.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intentSkyhookActivity = new Intent(getApplicationContext(), SkyHookActivity.class);
+                startActivity(intentSkyhookActivity);
             }
         });
     }

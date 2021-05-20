@@ -325,7 +325,24 @@
                 android:src="@drawable/ic_arrow_back_black_24dp"
                 android:background="@drawable/circle_background"
                 />
+
         </RelativeLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btn_skyhookActivity"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="24dp"
+                android:layout_marginRight="24dp"
+                android:layout_weight="1"
+                android:text="get Location" />
+        </LinearLayout>
+
 
     </LinearLayout>
 
