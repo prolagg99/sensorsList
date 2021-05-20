@@ -2,24 +2,19 @@ package com.example.sensorslist;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.Context;
 import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener{
     SensorManager mSensorManager;
@@ -29,15 +24,16 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private Sensor mSensorAccelerometer;
     private Sensor mSensorMagnetometer;
     private Sensor mSensorGyroscope;
+    private Sensor mSensorStepDetecter;
 
-    // TextViews to display current sensor values
-    TextView mTextAccSensor_X, mTextAccSensor_Y, mTextAccSensor_Z;
-    TextView mTextMagSensor_X, mTextMagSensor_Y, mTextMagSensor_Z;
-    TextView mTextGyroSensor_X, mTextGyroSensor_Y, mTextGyroSensor_Z;
-    TextView mTextLightSensor_LUX;
-    TextView mTextLightSensor, mTextGyroSensor, mTextMagnSensor;
-    Button btnStart, btnReset;
-    ImageView btnTestActivity;
+    // EditTexts to display current sensor values
+    EditText mTextAccSensor_X, mTextAccSensor_Y, mTextAccSensor_Z;
+    EditText mTextMagSensor_X, mTextMagSensor_Y, mTextMagSensor_Z;
+    EditText mTextGyroSensor_X, mTextGyroSensor_Y, mTextGyroSensor_Z;
+    EditText mTextLightSensor_LUX, mTextNmbrOfSteps;
+    TextView mTextLightSensor, mTextGyroSensor, mTextMagnSensor, mTextStepCounterSensor;
+    Button btnStart, btnReset, btnStepDetecter;
+    ImageView btnTestActivity, btnConnectivityActivity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,34 +43,40 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         //call the error msg from String resources
         String sensor_error = getResources().getString(R.string.error_no_sensor);
 
-        mTextAccSensor_X = (TextView) findViewById(R.id.acc_x);
-        mTextAccSensor_Y = (TextView) findViewById(R.id.acc_y);
-        mTextAccSensor_Z = (TextView) findViewById(R.id.acc_z);
+        mTextAccSensor_X = (EditText) findViewById(R.id.acc_x);
+        mTextAccSensor_Y = (EditText) findViewById(R.id.acc_y);
+        mTextAccSensor_Z = (EditText) findViewById(R.id.acc_z);
 
-        mTextMagSensor_X = (TextView) findViewById(R.id.mag_x);
-        mTextMagSensor_Y = (TextView) findViewById(R.id.mag_y);
-        mTextMagSensor_Z = (TextView) findViewById(R.id.mag_z);
+        mTextMagSensor_X = (EditText) findViewById(R.id.mag_x);
+        mTextMagSensor_Y = (EditText) findViewById(R.id.mag_y);
+        mTextMagSensor_Z = (EditText) findViewById(R.id.mag_z);
 
-        mTextGyroSensor_X = (TextView) findViewById(R.id.gyro_x);
-        mTextGyroSensor_Y = (TextView) findViewById(R.id.gyro_y);
-        mTextGyroSensor_Z = (TextView) findViewById(R.id.gyro_z);
+        mTextGyroSensor_X = (EditText) findViewById(R.id.gyro_x);
+        mTextGyroSensor_Y = (EditText) findViewById(R.id.gyro_y);
+        mTextGyroSensor_Z = (EditText) findViewById(R.id.gyro_z);
 
-        mTextLightSensor_LUX = (TextView) findViewById(R.id.light_lux);
+        mTextLightSensor_LUX = (EditText) findViewById(R.id.light_lux);
+        mTextNmbrOfSteps = (EditText) findViewById(R.id.nmbrOfSteps);
 
         mTextMagnSensor = (TextView) findViewById(R.id.id_magn);
         mTextGyroSensor = (TextView) findViewById(R.id.id_gyro);
         mTextLightSensor = (TextView) findViewById(R.id.id_light);
+        mTextStepCounterSensor = (TextView) findViewById(R.id.id_stepCounter);
 
         btnReset = (Button) findViewById(R.id.btnReset);
         btnStart = (Button) findViewById(R.id.btnStart);
+        btnStepDetecter = (Button) findViewById(R.id.btnStepDetecter);
 
+        // activities buttons
         btnTestActivity= (ImageView) findViewById(R.id.btn_testActivity);
+        btnConnectivityActivity = (ImageView) findViewById(R.id.btn_connectivityActivity);
 
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         mSensorLight = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
         mSensorAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         mSensorMagnetometer = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
         mSensorGyroscope = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+        mSensorStepDetecter = mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR);
 
         // to check if device support the sensor
         if(mSensorGyroscope == null)
@@ -83,10 +85,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             mTextMagnSensor.setText("Magnetometer: " + sensor_error);
         if(mSensorLight == null)
             mTextLightSensor.setText("Lumination: " + sensor_error);
+        if(mSensorStepDetecter == null)
+            mTextStepCounterSensor.setText("stepCounter: " + sensor_error);
 
         btnStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Log.e("acc : " , "clicked btn start" );
+
                 if (mSensorLight != null) {
                     mSensorManager.registerListener(MainActivity.this, mSensorLight,
                             SensorManager.SENSOR_DELAY_NORMAL);
@@ -114,11 +120,29 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             }
         });
 
+        btnStepDetecter.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mSensorStepDetecter != null) {
+                    mSensorManager.registerListener(MainActivity.this, mSensorStepDetecter,
+                            SensorManager.SENSOR_DELAY_NORMAL);
+                }
+            }
+        });
+
         btnTestActivity.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(),TestActivity.class);
-                startActivity(intent);
+                Intent intentTestActivity = new Intent(getApplicationContext(), TestActivity.class);
+                startActivity(intentTestActivity);
+            }
+        });
+
+        btnConnectivityActivity.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intentConnectivityActivity = new Intent(getApplicationContext(), ConnectivityActivity.class);
+                startActivity(intentConnectivityActivity);
             }
         });
     }
@@ -148,11 +172,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @Override
     protected void onStop() {
         super.onStop();
+        steps = 0;
         mSensorManager.unregisterListener(this);
     }
 
+    private int steps = 0;
     @Override
     public void onSensorChanged(SensorEvent event) {
+        Log.e("acc : " , "value : " + event.values[0]);
 
         int sensorType = event.sensor.getType();
         float currentValue = event.values[0];
@@ -193,6 +220,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 // Handle light sensor
                 mTextLightSensor_LUX.setText(getResources().getString(
                         R.string.label_light, currentValue));
+                break;
+            }
+            case Sensor.TYPE_STEP_DETECTOR: {
+                steps++;
+                mTextNmbrOfSteps.setText(Integer.toString(steps));
                 break;
             }
             case Sensor.TYPE_ACCELEROMETER: {

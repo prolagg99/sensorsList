@@ -241,7 +241,7 @@
             app:layout_constraintTop_toTopOf="parent">
 
             <Button
-                android:id="@+id/button"
+                android:id="@+id/btnStepDetecter"
                 android:layout_width="100dp"
                 android:layout_height="60dp"
                 android:layout_weight="0"
@@ -255,7 +255,7 @@
                 android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/textView5"
+                    android:id="@+id/id_stepCounter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="0"
@@ -264,7 +264,7 @@
                     android:textSize="18dp" />
 
                 <EditText
-                    android:id="@+id/nmbrSteps"
+                    android:id="@+id/nmbrOfSteps"
                     android:layout_width="100dp"
                     android:layout_height="46dp"
                     android:layout_weight="0"
@@ -299,7 +299,7 @@
                 android:text="reset" />
         </LinearLayout>
 
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
@@ -307,6 +307,7 @@
 
             <ImageView
                 android:id="@+id/btn_testActivity"
+                android:layout_alignParentRight="true"
                 android:layout_width="wrap_content"
                 android:gravity="center"
                 android:layout_height="wrap_content"
@@ -314,7 +315,17 @@
                 android:src="@drawable/ic_arrow_forward_black_24dp"
                 android:background="@drawable/circle_background"
                 />
-        </LinearLayout>
+            <ImageView
+                android:id="@+id/btn_connectivityActivity"
+                android:layout_alignParentLeft="true"
+                android:layout_width="wrap_content"
+                android:gravity="left"
+                android:layout_height="wrap_content"
+                android:padding="15dp"
+                android:src="@drawable/ic_arrow_back_black_24dp"
+                android:background="@drawable/circle_background"
+                />
+        </RelativeLayout>
 
     </LinearLayout>
 

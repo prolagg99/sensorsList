@@ -6,4 +6,8 @@
     <string name="x_axis">X %1$.5f</string>
     <string name="y_axis">Y %1$.5f</string>
     <string name="z_axis">Z %1$.5f</string>
+    <string name="cell_id">LAC : %1$d, CID : %2$d</string>
+    <string name="wifi_signal">SSID : %1$s, RSSI : %2$d</string>
+    <string name="ip_address">Router ip address : %1$s</string>
+    <string name="mac_address">Router mac address : %1$s</string>
 </resources>
