@@ -32,7 +32,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     EditText mTextGyroSensor_X, mTextGyroSensor_Y, mTextGyroSensor_Z;
     EditText mTextLightSensor_LUX, mTextNmbrOfSteps;
     TextView mTextLightSensor, mTextGyroSensor, mTextMagnSensor, mTextStepCounterSensor;
-    Button btnStart, btnReset, btnStepDetecter, btnSkyhookActivity;
+    Button btnStart, btnReset, btnStepDetecter, btnSkyhookActivity, btnWekaActivity;
     ImageView btnTestActivity, btnConnectivityActivity;
 
     @Override
@@ -71,6 +71,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         btnTestActivity= (ImageView) findViewById(R.id.btn_testActivity);
         btnConnectivityActivity = (ImageView) findViewById(R.id.btn_connectivityActivity);
         btnSkyhookActivity = (Button) findViewById(R.id.btn_skyhookActivity);
+        btnWekaActivity = (Button) findViewById(R.id.btn_wekaActivity);
 
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         mSensorLight = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
@@ -152,6 +153,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             public void onClick(View v) {
                 Intent intentSkyhookActivity = new Intent(getApplicationContext(), SkyHookActivity.class);
                 startActivity(intentSkyhookActivity);
+            }
+        });
+
+        btnWekaActivity.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intentTestActivity = new Intent(getApplicationContext(), WekaActivity.class);
+                startActivity(intentTestActivity);
             }
         });
     }

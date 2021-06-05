@@ -14,6 +14,8 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.telephony.CellIdentityLte;
 import android.telephony.CellInfo;
+import android.telephony.CellInfoGsm;
+import android.telephony.CellSignalStrengthGsm;
 import android.telephony.TelephonyManager;
 import android.telephony.gsm.GsmCellLocation;
 import android.text.format.Formatter;
@@ -23,30 +25,95 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
+import 	android.telephony.SignalStrength;
+import 	android.telephony.CellIdentityGsm;
+import 	android.telephony.CellInfoLte;
+import 	android.telephony.CellInfoWcdma;
+import 	android.telephony.CellIdentityWcdma;
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.nio.ByteOrder;
 import java.util.List;
 
+import java.lang.reflect.Method;
+import android.app.Activity;
+import android.content.Context;
+import android.os.Bundle;
+import android.telephony.PhoneStateListener;
+import android.telephony.SignalStrength;
+import android.telephony.TelephonyManager;
+import android.util.Log;
+
 public class ConnectivityActivity extends AppCompatActivity {
 
     final private int REQUEST_CODE_ASK_PERMISSIONS = 13;
-    TextView tvCellId, tvWifiSignal, tvRouterIpAddress, tvRouterMacAddress;
+    TextView tvCellIdCode1, tvWifiSignal, tvRouterIpAddress, tvRouterMacAddress,
+            tvNetworkType, tvCellRSSI, tvCellIDCode2;
     ImageView ivWifiSignal;
     Button btnCellId;
+
+    TelephonyManager mTelephonyManager;
+    MyPhoneStateListener mPhoneStatelistener;
+    int mSignalStrength = 0;
+
+
+    class MyPhoneStateListener extends PhoneStateListener {
+
+        @Override
+        public void onSignalStrengthsChanged(SignalStrength signalStrength) {
+            super.onSignalStrengthsChanged(signalStrength);
+            mSignalStrength = signalStrength.getGsmSignalStrength();
+            mSignalStrength = (2 * mSignalStrength) - 113; // -> dBm
+            Log.e("gsm rssi", "value :" + mSignalStrength);
+            tvCellRSSI.setText(getResources().getString(R.string.cell_RSSI, mSignalStrength));
+        }
+    }
+
+    public class MobileInfoRecognizer {
+        public String getCellInfo(CellInfo cellInfo) {
+            String additional_info = null;
+            if (cellInfo instanceof CellInfoGsm) {
+                CellInfoGsm cellInfoGsm = (CellInfoGsm) cellInfo;
+                CellIdentityGsm cellIdentityGsm = cellInfoGsm.getCellIdentity();
+                additional_info = "cell identity GSM " + cellIdentityGsm.getCid() + "\n"
+                        + "Mobile country code " + cellIdentityGsm.getMcc() + "\n"
+                        + "Mobile network code " + cellIdentityGsm.getMnc() + "\n"
+                        + "local area " + cellIdentityGsm.getLac() + "\n";
+            } else if (cellInfo instanceof CellInfoLte) {
+                CellInfoLte cellInfoLte = (CellInfoLte) cellInfo;
+                CellIdentityLte cellIdentityLte = cellInfoLte.getCellIdentity();
+                additional_info = "cell identity LTE " + cellIdentityLte.getCi() + "\n"
+                        + "Mobile country code " + cellIdentityLte.getMcc() + "\n"
+                        + "Mobile network code " + cellIdentityLte.getMnc() + "\n"
+                        + "physical cell " + cellIdentityLte.getPci() + "\n"
+                        + "Tracking area code " + cellIdentityLte.getTac() + "\n";
+            } else if (cellInfo instanceof CellInfoWcdma){
+                CellInfoWcdma cellInfoWcdma = (CellInfoWcdma) cellInfo;
+                CellIdentityWcdma cellIdentityWcdma = cellInfoWcdma.getCellIdentity();
+                additional_info = "cell identity WCDMA " + cellIdentityWcdma.getCid() + "\n"
+                        + "Mobile country code " + cellIdentityWcdma.getMcc() + "\n"
+                        + "Mobile network code " + cellIdentityWcdma.getMnc() + "\n"
+                        + "local area " + cellIdentityWcdma.getLac() + "\n";
+            }
+            return additional_info;
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_connectivity);
 
-        tvCellId = (TextView) findViewById(R.id.tvCellID);
+        tvCellIdCode1 = (TextView) findViewById(R.id.tvCellIDCode1);
         tvWifiSignal = (TextView) findViewById(R.id.tvWifiSignal);
         tvRouterIpAddress = (TextView) findViewById(R.id.tvRouterIpAddress);
         tvRouterMacAddress = (TextView) findViewById(R.id.tvRouterMacAddress);
         ivWifiSignal = (ImageView) findViewById(R.id.ivWifiSignal);
         btnCellId = (Button) findViewById(R.id.btnCellID);
+        tvNetworkType = (TextView) findViewById(R.id.tvNetworkType);
+        tvCellRSSI = (TextView) findViewById(R.id.tvCellRSSI);
+        tvCellIDCode2 = (TextView) findViewById(R.id.tvCellIDCode2);
+
 
         btnCellId.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -55,7 +122,8 @@ public class ConnectivityActivity extends AppCompatActivity {
 
                 requestPermissions(new String[]{
                         android.Manifest.permission.ACCESS_FINE_LOCATION,
-                        android.Manifest.permission.ACCESS_COARSE_LOCATION},
+                        android.Manifest.permission.ACCESS_COARSE_LOCATION,
+                        Manifest.permission.READ_PHONE_STATE},
                 REQUEST_CODE_ASK_PERMISSIONS);
 
                 if (ActivityCompat.checkSelfPermission(ConnectivityActivity.this,
@@ -63,9 +131,12 @@ public class ConnectivityActivity extends AppCompatActivity {
                         PackageManager.PERMISSION_GRANTED
                         && ActivityCompat.checkSelfPermission(ConnectivityActivity.this,
                         Manifest.permission.ACCESS_COARSE_LOCATION) !=
-                        PackageManager.PERMISSION_GRANTED) {
-                    return;
-                }
+                        PackageManager.PERMISSION_GRANTED
+                        && ActivityCompat.checkSelfPermission(ConnectivityActivity.this,
+                        Manifest.permission.READ_PHONE_STATE) !=
+                        PackageManager.PERMISSION_GRANTED){
+                            return;
+                        }
 
                 // get the cell ID & Location area code
                 final TelephonyManager telephony = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
@@ -73,11 +144,29 @@ public class ConnectivityActivity extends AppCompatActivity {
 //                Toast.makeText(ConnectivityActivity.this,"cellID " + location.getCid()
 //                        + " LAC " + location.getLac(), Toast.LENGTH_LONG).show();
                 if (location != null) {
-                    tvCellId.setText(getResources().getString(R.string.cell_id, location.getLac(), location.getCid()));
+                    tvCellIdCode1.setText(getResources().getString(R.string.cell_id, location.getLac(), location.getCid()));
 //                    msg.setText("LAC: " + location.getLac() + " CID: " + location.getCid());
                 }else {
 //                    msg.setText("NULL");
                 }
+
+                // get information about connection (GSM / LTE / WCDMA--> technolgie of multiplixing used by 3G)
+                MobileInfoRecognizer mobileInfoRecognizer = new MobileInfoRecognizer();
+                List<CellInfo> cellInfos = telephony.getAllCellInfo();
+                String additional_info = mobileInfoRecognizer.getCellInfo(cellInfos.get(0));
+                Log.e("connection information" , " value " + additional_info);
+                tvCellIDCode2.setText(additional_info);
+
+                // RSSI of cell
+                mPhoneStatelistener = new MyPhoneStateListener();
+//                mTelephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+                telephony.listen(mPhoneStatelistener, PhoneStateListener.LISTEN_SIGNAL_STRENGTHS);
+
+//                CellInfoGsm cellinfogsm = (CellInfoGsm)telephony.getAllCellInfo().get(0);
+//                CellSignalStrengthGsm cellSignalStrengthGsm = cellinfogsm.getCellSignalStrength();
+//                cellSignalStrengthGsm.getDbm();
+//                Log.e("RSSI for GSM" , "value :" +  cellSignalStrengthGsm.getDbm());
+
 
                 // get the SSID & RSSI & ip_@ of wireless network wifi
                 WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
@@ -132,9 +221,49 @@ public class ConnectivityActivity extends AppCompatActivity {
 //                Good -50 to -60 dBm
 //                Fair -60 to -70 dBm
 //                Weak < -70 dBm
+
+
+//                if (ActivityCompat.checkSelfPermission(ConnectivityActivity.this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+//                    // TODO: Consider calling
+//                    //    ActivityCompat#requestPermissions
+//                    // here to request the missing permissions, and then overriding
+//                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+//                    //                                          int[] grantResults)
+//                    // to handle the case where the user grants the permission. See the documentation
+//                    // for ActivityCompat#requestPermissions for more details.
+//                    return;
+//                }
+//            // get the type of network !!
+//                int networkType = telephony.getNetworkType();
+//                switch (networkType) {
+//                    case TelephonyManager.NETWORK_TYPE_GPRS:
+//                    case TelephonyManager.NETWORK_TYPE_EDGE:
+//                    case TelephonyManager.NETWORK_TYPE_CDMA:
+//                    case TelephonyManager.NETWORK_TYPE_1xRTT:
+//                    case TelephonyManager.NETWORK_TYPE_IDEN:
+//                        tvNetworkType.setText("2G");
+//                    case TelephonyManager.NETWORK_TYPE_UMTS:
+//                    case TelephonyManager.NETWORK_TYPE_EVDO_0:
+//                    case TelephonyManager.NETWORK_TYPE_EVDO_A:
+//                    case TelephonyManager.NETWORK_TYPE_HSDPA:
+//                    case TelephonyManager.NETWORK_TYPE_HSUPA:
+//                    case TelephonyManager.NETWORK_TYPE_HSPA:
+//                    case TelephonyManager.NETWORK_TYPE_EVDO_B:
+//                    case TelephonyManager.NETWORK_TYPE_EHRPD:
+//                    case TelephonyManager.NETWORK_TYPE_HSPAP:
+//                        tvNetworkType.setText("3G");
+//                    case TelephonyManager.NETWORK_TYPE_LTE:
+//                        tvNetworkType.setText("4G");
+//                    case TelephonyManager.NETWORK_TYPE_NR:
+//                        tvNetworkType.setText("5G");
+//                    default:
+//                        tvNetworkType.setText("UNKNOWN");
+//                }
+
             }
         });
     }
+
 
 //    public String getMacId() {
 //        WifiManager wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
@@ -142,3 +271,34 @@ public class ConnectivityActivity extends AppCompatActivity {
 //        return wifiInfo.getBSSID();
 //    }
 }
+
+
+//        part[0] = "Signalstrength:"  _ignore this, it's just the title_
+//
+//        parts[1] = GsmSignalStrength
+//
+//        parts[2] = GsmBitErrorRate
+//
+//        parts[3] = CdmaDbm
+//
+//        parts[4] = CdmaEcio
+//
+//        parts[5] = EvdoDbm
+//
+//        parts[6] = EvdoEcio
+//
+//        parts[7] = EvdoSnr
+//
+//        parts[8] = LteSignalStrength
+//
+//        parts[9] = LteRsrp
+//
+//        parts[10] = LteRsrq
+//
+//        parts[11] = LteRssnr
+//
+//        parts[12] = LteCqi
+//
+//        parts[13] = gsm|lte|cdma
+//
+//        parts[14] = _not really sure what this number is_

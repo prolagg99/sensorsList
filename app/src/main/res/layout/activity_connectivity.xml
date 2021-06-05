@@ -16,14 +16,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <TextView
-            android:id="@+id/tvCellID"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="8dp"
-            android:text="@string/cell_id"
-            android:textColor="#000000"
-            android:textSize="16dp" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -74,6 +66,56 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="get cell ID" />
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            >
+
+            <TextView
+                android:id="@+id/tvNetworkType"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:padding="8dp"
+                android:text=""
+                android:textColor="#000000"
+                android:textSize="16dp" />
+
+        </LinearLayout>
+
+
+        <TextView
+            android:id="@+id/tvCellIDCode1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:text="@string/cell_id"
+            android:textColor="#000000"
+            android:textSize="16dp" />
+
+        <TextView
+            android:id="@+id/tvCellIDCode2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:text=""
+            android:textColor="#000000"
+            android:textSize="16dp" />
+
+        <TextView
+            android:id="@+id/tvCellRSSI"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:text="@string/cell_RSSI"
+            android:textColor="#000000"
+            android:textSize="16dp" />
+
+
 
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
