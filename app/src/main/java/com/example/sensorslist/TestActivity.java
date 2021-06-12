@@ -19,6 +19,14 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.Toast;
+
+import com.studioidan.httpagent.HttpAgent;
+import com.studioidan.httpagent.JsonCallback;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 
@@ -48,6 +56,9 @@ public class TestActivity extends AppCompatActivity implements SensorEventListen
 
     boolean accChecked, magnChecked, gyroChecked = false;
     int nmbrOfCheck = 0;
+    double[] resultAcc;
+    double[] resultGyro;
+    double[] resultMagn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -164,7 +175,6 @@ public class TestActivity extends AppCompatActivity implements SensorEventListen
 
                                 Log.e("listSize after collect" , " value : " + acclDataCollection.size());
                                 // calculate the mean after the collection of data done
-                                double[] result;
                                 double mean[] = new double[] {0,0,0};
                                 for (ValuesOf_x_y_z d : acclDataCollection ){
                                     mean[0] += d.x;
@@ -178,39 +188,79 @@ public class TestActivity extends AppCompatActivity implements SensorEventListen
                                 Log.e("division ", "value" + mean[0] + " " + mean[1] + " " + mean[2] );
 
                                 if(acclDataCollection.size() != 0){
-                                    result = meanFun(acclDataCollection, acclDataCollection.size());
-                                    x_accMean.setText(getResources().getString(R.string.x_axis, result[0]));
-                                    y_accMean.setText(getResources().getString(R.string.y_axis, result[1]));
-                                    z_accMean.setText(getResources().getString(R.string.z_axis, result[2]));
+                                    resultAcc = meanFun(acclDataCollection, acclDataCollection.size());
+                                    x_accMean.setText(getResources().getString(R.string.x_axis, resultAcc[0]));
+                                    y_accMean.setText(getResources().getString(R.string.y_axis, resultAcc[1]));
+                                    z_accMean.setText(getResources().getString(R.string.z_axis, resultAcc[2]));
                                     accMeanField.setVisibility(View.VISIBLE);
+                                    Log.e("the value", "value" + resultAcc[0]);
                                     // before clear data i should upload it to the dataBase
                                     acclDataCollection.clear();
                                 }
                                 Log.e("listSize after clean" , " value : " + acclDataCollection.size());
 
                                 if(magnDataCollection.size() != 0){
-                                    result = meanFun(magnDataCollection, magnDataCollection.size());
-                                    x_magMean.setText(getResources().getString(R.string.x_axis, result[0]));
-                                    y_magMean.setText(getResources().getString(R.string.y_axis, result[1]));
-                                    z_magMean.setText(getResources().getString(R.string.z_axis, result[2]));
+                                    resultGyro = meanFun(magnDataCollection, magnDataCollection.size());
+                                    x_magMean.setText(getResources().getString(R.string.x_axis, resultGyro[0]));
+                                    y_magMean.setText(getResources().getString(R.string.y_axis, resultGyro[1]));
+                                    z_magMean.setText(getResources().getString(R.string.z_axis, resultGyro[2]));
                                     magnMeanField.setVisibility(View.VISIBLE);
+                                    Log.e("the value", "value" + resultAcc[0]);
+
                                     // before clear data i should upload it to the dataBase
                                     magnDataCollection.clear();
                                 }
                                 if(gyroDataCollection.size() != 0){
-                                    result = meanFun(gyroDataCollection, gyroDataCollection.size());
-                                    x_gyroMean.setText(getResources().getString(R.string.x_axis, result[0]));
-                                    y_gyroMean.setText(getResources().getString(R.string.y_axis, result[1]));
-                                    z_gyroMean.setText(getResources().getString(R.string.z_axis, result[2]));
+                                    resultMagn = meanFun(gyroDataCollection, gyroDataCollection.size());
+                                    x_gyroMean.setText(getResources().getString(R.string.x_axis, resultMagn[0]));
+                                    y_gyroMean.setText(getResources().getString(R.string.y_axis, resultMagn[1]));
+                                    z_gyroMean.setText(getResources().getString(R.string.z_axis, resultMagn[2]));
                                     gyroMeanField.setVisibility(View.VISIBLE);
+                                    Log.e("the value", "value" + resultAcc[0]);
+
                                     // before clear data i should upload it to the dataBase
                                     gyroDataCollection.clear();
                                 }
+                                HttpAgent.post("http://192.168.1.34:8080/WebServiceTest/Greeting")
+                                        .queryParams("acc_x",resultAcc[0]+"","acc_y",resultAcc[1]+"","acc_z",resultAcc[2]+""
+                                                ,"gyro_x",resultGyro[0]+"","gyro_y",resultGyro[1]+"","gyro_z",resultGyro[2]+"",
+                                                "magn_x",resultGyro[0]+"","magn_y",resultGyro[1]+"","magn_z",resultGyro[2]+"")
+                                        .goJson(new JsonCallback() {
+                                            @Override
+                                            protected void onDone(boolean success, JSONObject jsonObject) {
+                                                    Log.e("msg", "value" + jsonObject);
+                                                try {
+                                                    Log.e("msg", "value " + jsonObject.get("Greeting"));
+                                                    id_behavior.setText(jsonObject.get("Greeting").toString());
+                                                } catch (JSONException e) {
+                                                    e.printStackTrace();
+                                                }
+//                                                    JSONArray jsonArray = jsonObject.getJSONArray("data");
+//                                                    Toast.makeText(TestActivity.this, jsonArray.toString(), Toast.LENGTH_LONG).show();
+
+                                            }
+                                        });
                             }
                         }, 5000);
                     }
                 }
             });
+
+//            String.valueOf()
+
+//        Log.e("the value", "value" + resultAcc[0]);
+//             acc_x,acc_y,acc_z,gyro_x,gyro_y,gyro_z,magn_x,magn_y,magn_z
+//        HttpAgent.post("http://192.168.1.35:8080/WebServiceTest/Greeting")
+//                .queryParams("acc_x",resultAcc[0]+"","acc_y",resultAcc[1]+"","acc_z",resultAcc[2]+""
+//                        ,"gyro_x",resultGyro[0]+"","gyro_y",resultGyro[1]+"","gyro_z",resultGyro[2]+"",
+//                        "magn_x",resultGyro[0]+"","magn_y",resultGyro[1]+"","magn_z",resultGyro[2]+"")
+//                .withBody("{name:popapp ,age:27}")
+//                .goJson(new JsonCallback() {
+//                    @Override
+//                    protected void onDone(boolean success, JSONObject jsonObject) {
+//                        Toast.makeText(TestActivity.this, jsonObject.toString(), Toast.LENGTH_LONG).show();
+//                    }
+//                });
 
         // till now doing nothing
         checkbox_gyro.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {

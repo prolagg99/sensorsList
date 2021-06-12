@@ -32,7 +32,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     EditText mTextGyroSensor_X, mTextGyroSensor_Y, mTextGyroSensor_Z;
     EditText mTextLightSensor_LUX, mTextNmbrOfSteps;
     TextView mTextLightSensor, mTextGyroSensor, mTextMagnSensor, mTextStepCounterSensor;
-    Button btnStart, btnReset, btnStepDetecter, btnSkyhookActivity, btnWekaActivity;
+    Button btnStart, btnReset, btnStepDetecter, btnSkyhookActivity, btnWekaActivity, btnWifiAvailableNetwork;
     ImageView btnTestActivity, btnConnectivityActivity;
 
     @Override
@@ -72,6 +72,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         btnConnectivityActivity = (ImageView) findViewById(R.id.btn_connectivityActivity);
         btnSkyhookActivity = (Button) findViewById(R.id.btn_skyhookActivity);
         btnWekaActivity = (Button) findViewById(R.id.btn_wekaActivity);
+        btnWifiAvailableNetwork = (Button) findViewById(R.id.btn_wifiAvailableNetwork);
 
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         mSensorLight = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
@@ -161,6 +162,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             public void onClick(View v) {
                 Intent intentTestActivity = new Intent(getApplicationContext(), WekaActivity.class);
                 startActivity(intentTestActivity);
+            }
+        });
+
+        btnWifiAvailableNetwork.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intentWifiActivity = new Intent(getApplicationContext(), WifiActivity.class);
+                startActivity(intentWifiActivity);
             }
         });
     }
